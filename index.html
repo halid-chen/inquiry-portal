@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>詢價訊息解析入口</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Microsoft JhengHei', 'PingFang TC', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      color: white;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 18px; letter-spacing: 1px; }
+    header .subtitle { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+    .version-badge { background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px; font-size: 11px; }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-header {
+      background: #ebf4ff;
+      padding: 11px 16px;
+      font-weight: bold;
+      color: #2b6cb0;
+      border-bottom: 1px solid #bee3f8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    .card-body { padding: 16px; flex: 1; }
+
+    textarea {
+      width: 100%;
+      height: 320px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+      color: #2d3748;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { border-color: #4299e1; box-shadow: 0 0 0 3px rgba(66,153,225,0.15); }
+    textarea::placeholder { color: #a0aec0; font-size: 13px; }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-primary { background: #3182ce; color: white; }
+    .btn-primary:hover { background: #2c5282; transform: translateY(-1px); }
+    .btn-secondary { background: #edf2f7; color: #4a5568; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-success { background: #38a169; color: white; }
+    .btn-success:hover { background: #276749; transform: translateY(-1px); }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+    .examples-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .examples-label { font-size: 11px; color: #718096; white-space: nowrap; }
+    .example-btn {
+      background: white;
+      border: 1px solid #cbd5e0;
+      border-radius: 14px;
+      padding: 3px 11px;
+      font-size: 11px;
+      cursor: pointer;
+      color: #4a5568;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .example-btn:hover { background: #ebf8ff; border-color: #63b3ed; color: #2b6cb0; }
+
+    .field-grid { display: grid; gap: 8px; }
+    .field-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      align-items: center;
+      gap: 8px;
+    }
+    .field-label { font-size: 12px; color: #4a5568; font-weight: 600; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .field-val {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 13px;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .field-val input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      color: #2d3748;
+      min-width: 0;
+    }
+    .field-val.found { border-color: #68d391; background: #f0fff4; }
+    .field-val.empty { border-color: #f6ad55; background: #fffaf0; }
+    .field-unit { font-size: 11px; color: #a0aec0; white-space: nowrap; }
+
+    .tag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+      line-height: 1.5;
+    }
+    .tag-ok { background: #c6f6d5; color: #22543d; }
+    .tag-no { background: #feebc8; color: #7b341e; }
+
+    .dim-inputs { display: flex; align-items: center; gap: 5px; }
+    .dim-inputs input {
+      width: 52px;
+      text-align: center;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      color: #2d3748;
+    }
+    .dim-sep { color: #a0aec0; font-size: 13px; }
+
+    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 12px 0; }
+
+    .calc-box {
+      background: #ebf8ff;
+      border: 1px solid #90cdf4;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 12px;
+    }
+    .calc-title { font-size: 12px; color: #2c5282; font-weight: bold; margin-bottom: 8px; }
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 2px 0;
+      color: #4a5568;
+    }
+    .calc-row .val { font-weight: 600; color: #2b6cb0; }
+    .calc-highlight { font-size: 13px; font-weight: bold; color: #1a365d; }
+    .calc-divider { border-top: 1px dashed #bee3f8; margin: 6px 0; }
+
+    .output-section { margin-top: 12px; }
+    .output-label {
+      font-size: 11px;
+      color: #718096;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-box {
+      background: #1a202c;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'Courier New', 'Consolas', monospace;
+      font-size: 12.5px;
+      white-space: pre;
+      line-height: 1.7;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .status-bar {
+      padding: 7px 16px;
+      background: #f7fafc;
+      border-top: 1px solid #e2e8f0;
+      font-size: 11px;
+      color: #718096;
+      display: flex;
+      justify-content: space-between;
+    }
+    .ok { color: #38a169; font-weight: 600; }
+    .warn { color: #d69e2e; font-weight: 600; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #276749;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .placeholder-msg {
+      color: #a0aec0;
+      font-size: 13px;
+      text-align: center;
+      padding: 48px 0;
+    }
+
+    @media (max-width: 860px) {
+      .container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📦 詢價訊息解析入口</h1>
+    <div class="subtitle">貼上 Line / WhatsApp / Email 詢價訊息，自動整理成報價資料</div>
+  </div>
+  <span class="version-badge">免費本地版 v1.0</span>
+</header>
+
+<div class="container">
+
+  <!-- ===== 左側：輸入 ===== -->
+  <div class="card">
+    <div class="card-header">
+      <span>✉️ 貼上詢價訊息</span>
+      <button class="btn btn-secondary btn-sm" onclick="clearAll()">清除</button>
+    </div>
+    <div class="card-body">
+      <textarea id="msgInput"
+        placeholder="將詢價訊息貼到這裡...
+
+✦ 支援中文、英文、中英混合
+✦ 支援結構化格式（起運地：... / Origin: ...）
+✦ 支援自然語言（我有10箱服裝要從台灣寄到美國...）
+✦ 支援 Line、WhatsApp 對話及 Email 信件內容"></textarea>
+
+      <div class="examples-bar">
+        <span class="examples-label">試試範例：</span>
+        <button class="example-btn" onclick="loadExample(1)">中文結構化</button>
+        <button class="example-btn" onclick="loadExample(2)">中文自然語言</button>
+        <button class="example-btn" onclick="loadExample(3)">英文 Email</button>
+        <button class="example-btn" onclick="loadExample(4)">中英混合</button>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="parse()">🔍 解析訊息</button>
+        <button class="btn btn-secondary" onclick="clearAll()">清除全部</button>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span id="statusText">等待輸入...</span>
+      <span id="parseTime"></span>
+    </div>
+  </div>
+
+  <!-- ===== 右側：結果 ===== -->
+  <div class="card">
+    <div class="card-header">
+      <span>📋 解析結果</span>
+      <button class="btn btn-success btn-sm" onclick="copyResult()">📋 複製整理結果</button>
+    </div>
+    <div class="card-body">
+      <div class="field-grid" id="fieldGrid">
+        <div class="placeholder-msg">貼上訊息後點擊「解析訊息」</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="calc-box" id="calcBox" style="display:none;">
+        <div class="calc-title">📐 材積重試算</div>
+        <div id="calcContent"></div>
+        <div style="font-size:10px;color:#4a5568;margin-top:6px;">※ 計費重 = 實重 與 材積重 取較大值</div>
+      </div>
+
+      <div class="output-section">
+        <div class="output-label">
+          <span>整理後格式（可直接複製貼到 Line / 報價單）：</span>
+        </div>
+        <div class="output-box" id="outputBox">— 尚未解析 —</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">✓ 已複製到剪貼簿！</div>
+
+<script>
+// =====================================================
+//  範例訊息
+// =====================================================
+const EXAMPLES = {
+  1: `起運地：台灣桃園
+目的地：美國洛杉磯
+品名：服裝（T-shirt）
+件數：20箱
+重量：80kg
+尺寸：60*40*30cm
+服務類型：DHL
+備註：需要出口報關`,
+
+  2: `你好，我這邊有一批貨要從台灣出發寄到日本東京，是電子零件，大概15件，毛重約30公斤，每件尺寸50x40x35公分，想問用UPS的話報價多少？謝謝`,
+
+  3: `Hi,
+
+Could you please quote for the below shipment?
+
+Origin: Taoyuan, Taiwan
+Destination: Frankfurt, Germany
+Commodity: Machine Parts
+Pieces: 5 cartons
+GW: 120 kgs
+Dimension: 80 x 60 x 50 cm / carton
+Service: Air Freight Coload
+
+Thank you`,
+
+  4: `客戶詢價：
+From: 台灣台北
+To: 澳洲墨爾本
+Commodity: 玩具 / Toys
+數量：8 cartons
+毛重：35kg
+SIZE: 55×45×40 cm
+FedEx 報價？`
+};
+
+// =====================================================
+//  解析核心
+// =====================================================
+let parsedData = {};
+
+function loadExample(n) {
+  document.getElementById('msgInput').value = EXAMPLES[n];
+  parse();
+}
+
+function parse() {
+  const text = document.getElementById('msgInput').value.trim();
+  if (!text) { alert('請先貼上詢價訊息'); return; }
+
+  const t0 = performance.now();
+  parsedData = {};
+
+  parsedData.origin    = extractOrigin(text);
+  parsedData.dest      = extractDest(text);
+  parsedData.commodity = extractCommodity(text);
+  parsedData.pieces    = extractPieces(text);
+  parsedData.weight    = extractWeight(text);
+  const dims           = extractDims(text);
+  parsedData.dimL      = dims.L;
+  parsedData.dimW      = dims.W;
+  parsedData.dimH      = dims.H;
+  parsedData.service   = extractService(text);
+  parsedData.notes     = extractNotes(text);
+
+  renderFields();
+  updateCalc();
+  renderOutput();
+
+  const mainKeys = ['origin','dest','commodity','pieces','weight','service'];
+  const found = mainKeys.filter(k => parsedData[k]).length;
+  const elapsed = (performance.now() - t0).toFixed(0);
+  const cls = found >= 4 ? 'ok' : 'warn';
+  document.getElementById('statusText').innerHTML =
+    `<span class="${cls}">✓ 解析完成：${found}/${mainKeys.length} 個主要欄位</span>`;
+  document.getElementById('parseTime').textContent = `${elapsed} ms`;
+}
+
+// =====================================================
+//  個別解析函式
+// =====================================================
+function clean(s) {
+  if (!s) return '';
+  return s.replace(/\s+/g, ' ').replace(/[。！!？?]$/, '').trim();
+}
+
+function extractOrigin(t) {
+  let m;
+  m = t.match(/起運(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/(?:寄送?|發貨)(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/出發(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/Origin[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  m = t.match(/From[：:\s]+([^\n,，\t]{2,30})/i); if (m) return clean(m[1]);
+  m = t.match(/Ship(?:ping)?(?:\s+from)?[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  // 自然語言
+  m = t.match(/從\s*([一-鿿\w]{2,15})\s*(?:寄|運|送|出發)/); if (m) return clean(m[1]);
+  m = t.match(/(?:from|departure)[：:\s]+([A-Za-z,\s]{3,30}?)(?:\s+to\b|\n)/i); if (m) return clean(m[1]);
+  return '';
+}
+
+function extractDest(t) {
+  let m;
+  m = t.match(/目的(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/到達(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/(?:收件|送達)(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/Dest(?:ination)?[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  m = t.match(/\bTo[：:\s]+([^\n,，\t]{2,30})/i); if (m) return clean(m[1]);
+  m = t.match(/Deliver(?:y)?\s+to[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  // 自然語言
+  m = t.match(/(?:寄|送|運)到\s*([一-鿿\w]{2,15})/); if (m) return clean(m[1]);
+  m = t.match(/\bto\s+([A-Za-z,\s]{3,30}?)(?:\n|,|$)/i); if (m) return clean(m[1]);
+  return '';
+}
+
+function extractCommodity(t) {
+  let m;
+  m = t.match(/品名[：:﹕]\s*([^\n,，、。]{2,40})/); if (m) return clean(m[1]);
+  m = t.match(/商品(?:名稱)?[：:﹕]\s*([^\n,，、。]{2,40})/); if (m) return clean(m[1]);
+  m = t.match(/貨(?:物|品)(?:名稱)?[：:﹕]\s*([^\n,，、。]{2,40})/); if (m) return clean(m[1]);
+  m = t.match(/Commodity[：:\s]+([^\n,，]{2,40})/i); if (m) return clean(m[1]);
+  m = t.match(/(?:Product|Goods?|Item)[s]?[：:\s]+([^\n,，]{2,40})/i); if (m) return clean(m[1]);
+  m = t.match(/Description[：:\s]+([^\n,，]{2,40})/i); if (m) return clean(m[1]);
+  // 自然語言：「是電子零件」「一批服裝」
+  m = t.match(/(?:是|有一批|一批|一些)\s*([一-鿿]{2,15})/); if (m) return clean(m[1]);
+  return '';
+}
+
+function extractPieces(t) {
+  let m;
+  m = t.match(/件數[：:﹕]\s*([^\n,，、。]{1,20})/); if (m) return clean(m[1]);
+  m = t.match(/(?:數量|箱數|托數|包裹數)[：:﹕]\s*([^\n,，、。]{1,20})/); if (m) return clean(m[1]);
+  m = t.match(/(?:Pcs?|Pieces?|Qty|Quantity|Cartons?|Ctns?)[：:\s.]+([^\n,，]{1,20})/i); if (m) return clean(m[1]);
+  // 數字 + 單位
+  m = t.match(/(\d+(?:\.\d+)?)\s*(箱|件|個|托|板|pcs|cartons?|ctns?|pieces?)/i);
+  if (m) return `${m[1]} ${m[2]}`;
+  return '';
+}
+
+function extractWeight(t) {
+  let m;
+  m = t.match(/(?:毛重|實重|重量)[：:.\s]*(\d+(?:\.\d+)?)\s*(?:kg|kgs|KG|公斤)?/i); if (m) return m[1];
+  m = t.match(/G\.?W\.?[：:\s]+(\d+(?:\.\d+)?)\s*(?:kg|kgs)?/i); if (m) return m[1];
+  m = t.match(/Weight[：:\s]+(\d+(?:\.\d+)?)\s*(?:kg|kgs)?/i); if (m) return m[1];
+  m = t.match(/(\d+(?:\.\d+)?)\s*(?:kg|kgs|公斤|千克)/i); if (m) return m[1];
+  return '';
+}
+
+function extractDims(t) {
+  let m;
+  // 60*40*30 / 60x40x30 / 60×40×30
+  m = t.match(/(\d+(?:\.\d+)?)\s*[×xX*＊]\s*(\d+(?:\.\d+)?)\s*[×xX*＊]\s*(\d+(?:\.\d+)?)\s*(?:cm|公分|CM|mm|MM)?/i);
+  if (m) return { L: m[1], W: m[2], H: m[3] };
+  // SIZE: 60 x 40 x 30
+  m = t.match(/size[：:\s]+(\d+(?:\.\d+)?)\s*[xX×*]\s*(\d+(?:\.\d+)?)\s*[xX×*]\s*(\d+(?:\.\d+)?)/i);
+  if (m) return { L: m[1], W: m[2], H: m[3] };
+  // L60 W40 H30
+  m = t.match(/[Ll][\s:]*(\d+)[^0-9\n]*[Ww][\s:]*(\d+)[^0-9\n]*[Hh][\s:]*(\d+)/);
+  if (m) return { L: m[1], W: m[2], H: m[3] };
+  // 尺寸: 後面跟數字
+  m = t.match(/尺寸[：:]\s*(\d+(?:\.\d+)?)\s*[,，\s]+(\d+(?:\.\d+)?)\s*[,，\s]+(\d+(?:\.\d+)?)/);
+  if (m) return { L: m[1], W: m[2], H: m[3] };
+  return { L: '', W: '', H: '' };
+}
+
+function extractService(t) {
+  let m;
+  m = t.match(/服務(?:類型|方式|項目)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/(?:運輸|配送|快遞)?方式[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/Service[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  m = t.match(/Carrier[：:\s]+([^\n,，]{2,20})/i); if (m) return clean(m[1]);
+  // 關鍵字
+  const svc = [];
+  if (/\bDHL\b/i.test(t)) svc.push('DHL');
+  if (/\bUPS\b/i.test(t)) svc.push('UPS');
+  if (/FedEx|聯邦快遞/i.test(t)) svc.push('FedEx');
+  if (/\bEMS\b/i.test(t)) svc.push('EMS');
+  if (/coload|co-load/i.test(t)) svc.push('空運 Coload');
+  if (/海運|sea\s*freight/i.test(t)) svc.push('海運');
+  if (/空運|air\s*freight/i.test(t) && !svc.includes('空運 Coload')) svc.push('空運');
+  if (/快遞|快件|courier/i.test(t) && !svc.length) svc.push('快遞');
+  if (svc.length) return svc.join(' / ');
+  return '';
+}
+
+function extractNotes(t) {
+  let m;
+  m = t.match(/備[注註][：:﹕]\s*([^\n]{2,120})/i); if (m) return clean(m[1]);
+  m = t.match(/Note[s]?[：:\s]+([^\n]{2,120})/i); if (m) return clean(m[1]);
+  m = t.match(/(?:特殊|注意)[事項需求要求]*[：:﹕]\s*([^\n]{2,120})/i); if (m) return clean(m[1]);
+  m = t.match(/Remark[s]?[：:\s]+([^\n]{2,120})/i); if (m) return clean(m[1]);
+  // 自然語言中的需求
+  m = t.match(/需要\s*([一-鿿\s，]{3,40})/); if (m) return clean(m[1]);
+  return '';
+}
+
+// =====================================================
+//  畫面渲染
+// =====================================================
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fieldRow(key, label, unit, placeholder) {
+  const val = parsedData[key] || '';
+  const found = !!val;
+  const tagHtml = found
+    ? '<span class="tag tag-ok">找到</span>'
+    : '<span class="tag tag-no">未解析</span>';
+  return `
+    <div class="field-row">
+      <div class="field-label">${label}${tagHtml}</div>
+      <div class="field-val ${found ? 'found' : 'empty'}">
+        <input type="text" id="f_${key}" value="${esc(val)}" placeholder="${esc(placeholder)}"
+          onchange="onEdit('${key}',this.value)">
+        ${unit ? `<span class="field-unit">${unit}</span>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderFields() {
+  const d = parsedData;
+  const dimFound = !!(d.dimL || d.dimW || d.dimH);
+
+  const dimTag = dimFound
+    ? '<span class="tag tag-ok">找到</span>'
+    : '<span class="tag tag-no">未解析</span>';
+
+  let html = '';
+  html += fieldRow('origin',    '起運地',   '',   '例：台灣桃園 / Taiwan');
+  html += fieldRow('dest',      '目的地',   '',   '例：美國洛杉磯 / Los Angeles');
+  html += fieldRow('commodity', '品名',     '',   '例：服裝 / Garments');
+  html += fieldRow('pieces',    '件數',     '',   '例：10 箱 / 10 cartons');
+  html += fieldRow('weight',    '實際重量', 'kg', '例：50.5');
+
+  // 尺寸合一行
+  html += `
+    <div class="field-row">
+      <div class="field-label">尺寸${dimTag}</div>
+      <div class="field-val ${dimFound ? 'found' : 'empty'}">
+        <div class="dim-inputs">
+          <input id="f_dimL" value="${esc(d.dimL||'')}" placeholder="長" onchange="onEdit('dimL',this.value)">
+          <span class="dim-sep">×</span>
+          <input id="f_dimW" value="${esc(d.dimW||'')}" placeholder="寬" onchange="onEdit('dimW',this.value)">
+          <span class="dim-sep">×</span>
+          <input id="f_dimH" value="${esc(d.dimH||'')}" placeholder="高" onchange="onEdit('dimH',this.value)">
+          <span class="field-unit">cm</span>
+        </div>
+      </div>
+    </div>`;
+
+  html += fieldRow('service', '服務類型', '', '例：DHL / UPS / 空運 Coload');
+  html += fieldRow('notes',   '備註',     '', '特殊需求、危險品、溫控等');
+
+  document.getElementById('fieldGrid').innerHTML = html;
+}
+
+function onEdit(key, val) {
+  parsedData[key] = val;
+  updateCalc();
+  renderOutput();
+}
+
+function updateCalc() {
+  const L = parseFloat(parsedData.dimL) || 0;
+  const W = parseFloat(parsedData.dimW) || 0;
+  const H = parseFloat(parsedData.dimH) || 0;
+  const wt = parseFloat(parsedData.weight) || 0;
+  const pcs = parseInt((parsedData.pieces || '').match(/\d+/)?.[0]) || 1;
+
+  if (!L || !W || !H) {
+    document.getElementById('calcBox').style.display = 'none';
+    return;
+  }
+
+  const volPerPc = L * W * H;
+  const volTotal = volPerPc * pcs;
+  const vwAir     = volTotal / 6000;
+  const vwCourier = volTotal / 5000;
+  const cbwAir     = Math.max(wt, vwAir);
+  const cbwCourier = Math.max(wt, vwCourier);
+
+  let html = `
+    <div class="calc-row"><span>每件材積：</span><span class="val">${L}×${W}×${H} = ${volPerPc.toLocaleString()} cm³</span></div>`;
+  if (pcs > 1) html += `
+    <div class="calc-row"><span>總材積（×${pcs}件）：</span><span class="val">${volTotal.toLocaleString()} cm³</span></div>`;
+  html += `
+    <div class="calc-row"><span>材積重（空運 ÷6000）：</span><span class="val">${vwAir.toFixed(2)} kg</span></div>
+    <div class="calc-row"><span>材積重（快遞 ÷5000）：</span><span class="val">${vwCourier.toFixed(2)} kg</span></div>`;
+  if (wt) {
+    html += `<div class="calc-divider"></div>
+    <div class="calc-row"><span>實際重量：</span><span class="val">${wt} kg</span></div>
+    <div class="calc-row calc-highlight"><span>計費重（空運）：</span><span>${cbwAir.toFixed(2)} kg</span></div>
+    <div class="calc-row calc-highlight"><span>計費重（快遞）：</span><span>${cbwCourier.toFixed(2)} kg</span></div>`;
+  }
+
+  document.getElementById('calcContent').innerHTML = html;
+  document.getElementById('calcBox').style.display = 'block';
+}
+
+function renderOutput() {
+  const d = parsedData;
+  const L = parseFloat(d.dimL)||0, W = parseFloat(d.dimW)||0, H = parseFloat(d.dimH)||0;
+  const wt = parseFloat(d.weight)||0;
+  const pcs = parseInt((d.pieces||'').match(/\d+/)?.[0]) || 1;
+
+  const dimStr  = (L && W && H) ? `${L} × ${W} × ${H} cm` : '（未提供）';
+  const wtStr   = wt ? `${wt} kg` : '（未提供）';
+
+  let chargeBlock = '';
+  if (L && W && H && wt) {
+    const vwA = (L*W*H*pcs)/6000, vwC = (L*W*H*pcs)/5000;
+    chargeBlock =
+      `材積重    ：${vwA.toFixed(2)} kg（空運） / ${vwC.toFixed(2)} kg（快遞）\n` +
+      `計費重    ：${Math.max(wt,vwA).toFixed(2)} kg（空運） / ${Math.max(wt,vwC).toFixed(2)} kg（快遞）\n`;
+  }
+
+  const lines = [
+    '══════════════════════════════',
+    '         詢  價  資  料',
+    '══════════════════════════════',
+    `起運地    ：${d.origin    || '（未提供）'}`,
+    `目的地    ：${d.dest      || '（未提供）'}`,
+    `品  名    ：${d.commodity || '（未提供）'}`,
+    `件  數    ：${d.pieces    || '（未提供）'}`,
+    `實際重量  ：${wtStr}`,
+    `尺  寸    ：${dimStr}`,
+    chargeBlock.trim(),
+    `服務類型  ：${d.service   || '（未提供）'}`,
+    d.notes ? `備  註    ：${d.notes}` : '',
+    '══════════════════════════════',
+  ].filter(l => l !== '').join('\n');
+
+  document.getElementById('outputBox').textContent = lines;
+}
+
+// =====================================================
+//  工具函式
+// =====================================================
+function copyResult() {
+  const txt = document.getElementById('outputBox').textContent;
+  if (txt === '— 尚未解析 —') { alert('請先解析訊息'); return; }
+  navigator.clipboard.writeText(txt).then(() => {
+    const t = document.getElementById('toast');
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 2500);
+  }).catch(() => {
+    // fallback for older browsers
+    const el = document.createElement('textarea');
+    el.value = txt;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    const t = document.getElementById('toast');
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 2500);
+  });
+}
+
+function clearAll() {
+  document.getElementById('msgInput').value = '';
+  parsedData = {};
+  document.getElementById('fieldGrid').innerHTML = '<div class="placeholder-msg">貼上訊息後點擊「解析訊息」</div>';
+  document.getElementById('calcBox').style.display = 'none';
+  document.getElementById('outputBox').textContent = '— 尚未解析 —';
+  document.getElementById('statusText').textContent = '等待輸入...';
+  document.getElementById('parseTime').textContent = '';
+}
+
+// 支援 Ctrl+Enter 快速解析
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('msgInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.ctrlKey) parse();
+  });
+});
+</script>
+
+</body>
+</html>
