@@ -619,6 +619,7 @@ function updateCalc() {
   const volTotal = volPerPc * pcs;
   const vwAir     = volTotal / 6000;
   const vwCourier = volTotal / 5000;
+  const cbm        = volTotal / 1000000;
   const cbwAir     = Math.max(wt, vwAir);
   const cbwCourier = Math.max(wt, vwCourier);
 
@@ -628,12 +629,14 @@ function updateCalc() {
     <div class="calc-row"><span>總材積（×${pcs}件）：</span><span class="val">${volTotal.toLocaleString()} cm³</span></div>`;
   html += `
     <div class="calc-row"><span>材積重（空運 ÷6000）：</span><span class="val">${vwAir.toFixed(2)} kg</span></div>
-    <div class="calc-row"><span>材積重（快遞 ÷5000）：</span><span class="val">${vwCourier.toFixed(2)} kg</span></div>`;
+    <div class="calc-row"><span>材積重（快遞 ÷5000）：</span><span class="val">${vwCourier.toFixed(2)} kg</span></div>
+    <div class="calc-row"><span>計費重（海運 CBM）：</span><span class="val">${cbm.toFixed(4)} CBM</span></div>`;
   if (wt) {
     html += `<div class="calc-divider"></div>
     <div class="calc-row"><span>實際重量：</span><span class="val">${wt} kg</span></div>
     <div class="calc-row calc-highlight"><span>計費重（空運）：</span><span>${cbwAir.toFixed(2)} kg</span></div>
-    <div class="calc-row calc-highlight"><span>計費重（快遞）：</span><span>${cbwCourier.toFixed(2)} kg</span></div>`;
+    <div class="calc-row calc-highlight"><span>計費重（快遞）：</span><span>${cbwCourier.toFixed(2)} kg</span></div>
+    <div class="calc-row calc-highlight"><span>計費重（海運）：</span><span>${cbm.toFixed(4)} CBM</span></div>`;
   }
 
   document.getElementById('calcContent').innerHTML = html;
@@ -650,11 +653,15 @@ function renderOutput() {
   const wtStr   = wt ? `${wt} kg` : '（未提供）';
 
   let chargeBlock = '';
-  if (L && W && H && wt) {
-    const vwA = (L*W*H*pcs)/6000, vwC = (L*W*H*pcs)/5000;
-    chargeBlock =
-      `材積重    ：${vwA.toFixed(2)} kg（空運） / ${vwC.toFixed(2)} kg（快遞）\n` +
-      `計費重    ：${Math.max(wt,vwA).toFixed(2)} kg（空運） / ${Math.max(wt,vwC).toFixed(2)} kg（快遞）\n`;
+  if (L && W && H) {
+    const volT = L*W*H*pcs;
+    const vwA = volT/6000, vwC = volT/5000, cbm = volT/1000000;
+    chargeBlock = `計費重（海運）：${cbm.toFixed(4)} CBM\n`;
+    if (wt) {
+      chargeBlock +=
+        `材積重    ：${vwA.toFixed(2)} kg（空運） / ${vwC.toFixed(2)} kg（快遞）\n` +
+        `計費重    ：${Math.max(wt,vwA).toFixed(2)} kg（空運） / ${Math.max(wt,vwC).toFixed(2)} kg（快遞）\n`;
+    }
   }
 
   const lines = [
