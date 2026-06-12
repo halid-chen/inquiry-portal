@@ -438,6 +438,8 @@ function extractOrigin(t) {
   // 自然語言
   m = t.match(/從\s*([一-鿿\w]{2,15})\s*(?:寄|運|送|出發)/); if (m) return clean(m[1]);
   m = t.match(/(?:from|departure)[：:\s]+([A-Za-z,\s]{3,30}?)(?:\s+to\b|\n)/i); if (m) return clean(m[1]);
+  m = t.match(/提貨(?:地址)?[：:\s]+([^\n,，]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/(台灣|台北|桃園|新竹|苗栗|台中|彰化|南投|雲林|嘉義|台南|高雄|屏東|宜蘭|花蓮|台東|基隆|中國|大陸|上海|廣州|深圳|北京|日本|韓國|香港)\s*[Tt][Oo]/); if (m) return clean(m[1]);
   return '';
 }
 
@@ -452,6 +454,8 @@ function extractDest(t) {
   // 自然語言
   m = t.match(/(?:寄|送|運)到\s*([一-鿿\w]{2,15})/); if (m) return clean(m[1]);
   m = t.match(/\bto\s+([A-Za-z,\s]{3,30}?)(?:\n|,|$)/i); if (m) return clean(m[1]);
+  m = t.match(/送貨(?:地址)?[：:\s]+([^\n,，]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/[Tt][Oo]\s*(美國|日本|韓國|英國|德國|法國|澳洲|加拿大|香港|澳門|新加坡|越南|泰國|印尼|菲律賓|馬來西亞|印度|中國|大陸|台灣|歐洲|中東)/); if (m) return clean(m[1]);
   return '';
 }
 
