@@ -449,13 +449,13 @@ function extractDest(t) {
   m = t.match(/到達(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
   m = t.match(/(?:收件|送達)(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
   m = t.match(/Dest(?:ination)?[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  m = t.match(/[Tt][Oo]\s*(美國|日本|韓國|英國|德國|法國|澳洲|加拿大|香港|澳門|新加坡|越南|泰國|印尼|菲律賓|馬來西亞|印度|中國|大陸|台灣|歐洲|中東)/); if (m) return clean(m[1]);
+  m = t.match(/送貨(?:地址)?[：:\s]+([^\n,，]{2,30})/); if (m) return clean(m[1]);
   m = t.match(/\bTo[：:\s]+([^\n,，\t]{2,30})/i); if (m) return clean(m[1]);
   m = t.match(/Deliver(?:y)?\s+to[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
   // 自然語言
   m = t.match(/(?:寄|送|運)到\s*([一-鿿\w]{2,15})/); if (m) return clean(m[1]);
   m = t.match(/\bto\s+([A-Za-z,\s]{3,30}?)(?:\n|,|$)/i); if (m) return clean(m[1]);
-  m = t.match(/送貨(?:地址)?[：:\s]+([^\n,，]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/[Tt][Oo]\s*(美國|日本|韓國|英國|德國|法國|澳洲|加拿大|香港|澳門|新加坡|越南|泰國|印尼|菲律賓|馬來西亞|印度|中國|大陸|台灣|歐洲|中東)/); if (m) return clean(m[1]);
   return '';
 }
 
