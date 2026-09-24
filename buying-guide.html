@@ -154,6 +154,60 @@
     .warn-item h4 { font-size: 13.5px; color: #7c4a1e; margin-bottom: 4px; }
     .warn-item p { font-size: 12.5px; color: #718096; }
 
+    /* ===== 撿便宜管道 ===== */
+    .channel {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .channel-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .channel-num {
+      flex: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #dd9933;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    .channel-head h3 { font-size: 15px; color: #2d3748; }
+    .channel-desc { font-size: 12.5px; color: #718096; margin-bottom: 10px; }
+    .channel-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .channel-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fffaf0;
+      border: 1px solid #f0e2c8;
+      border-radius: 14px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: #7c4a1e;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .channel-links a:hover { background: #f0e2c8; border-color: #dd9933; }
+    .channel-note {
+      font-size: 11.5px;
+      color: #a0aec0;
+      margin-top: 8px;
+      background: #f7fafc;
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+    .source-note {
+      font-size: 11.5px;
+      color: #a0aec0;
+      margin: -6px 0 14px;
+    }
+
     /* ===== 檢查清單 ===== */
     .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
     @media (max-width: 760px) { .checklist { grid-template-columns: 1fr; } }
@@ -210,6 +264,7 @@
 <nav>
   <div class="inner">
     <a href="#process">購屋流程</a>
+    <a href="#channels">撿便宜管道</a>
     <a href="#costs">相關費用</a>
     <a href="#calc">貸款試算</a>
     <a href="#pitfalls">注意事項</a>
@@ -280,6 +335,61 @@
           <p>核對水電瓦斯錶度數與費用結清、設備清單、鑰匙與保固文件，確認屋況與簽約時一致後正式交屋。</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===== 撿便宜管道（台北市・新北市） ===== -->
+  <section id="channels">
+    <div class="section-title">🔍 5 大撿便宜看屋管道（台北市・新北市）</div>
+    <div class="source-note">※ 除了 591 之外，以下是內行投資客常追蹤的公部門 / 資產公司公開資訊管道，物件較冷門、議價空間通常較大，但也需自行留意產權、點交風險，交易前務必詳閱公告全文並諮詢專業人士。</div>
+
+    <div class="channel">
+      <div class="channel-head"><div class="channel-num">1</div><h3>法院法拍屋公告</h3></div>
+      <div class="channel-desc">法院對欠債未還被強制執行的不動產進行公開拍賣，價格通常低於市價，是投資客每天必看的管道。台北市與新北市分屬不同地方法院管轄。</div>
+      <div class="channel-links">
+        <a href="https://aomp109.judicial.gov.tw/judbp/wkw/WHD1A02.htm" target="_blank" rel="noopener">司法院法拍屋公告查詢系統</a>
+        <a href="https://tpd.judicial.gov.tw/tw/np-2834-151.html" target="_blank" rel="noopener">臺灣臺北地方法院查詢服務</a>
+        <a href="https://pcd.judicial.gov.tw/tw/np-403-161.html" target="_blank" rel="noopener">臺灣新北地方法院拍賣專區</a>
+      </div>
+    </div>
+
+    <div class="channel">
+      <div class="channel-head"><div class="channel-num">2</div><h3>台灣金融資產服務公司（台灣金聯）</h3></div>
+      <div class="channel-desc">銀行等金融機構的不良資產（欠款抵押品）委託專門公司處理去化，物件包含法拍前流標屋、金融機構持有不動產，資訊相對不公開、知道的人較少。</div>
+      <div class="channel-links">
+        <a href="https://www.tfasc.com.tw/" target="_blank" rel="noopener">台灣金融資產服務股份有限公司</a>
+        <a href="https://www.tamco.com.tw/webtamco/" target="_blank" rel="noopener">台灣金聯資產管理公司</a>
+      </div>
+    </div>
+
+    <div class="channel">
+      <div class="channel-head"><div class="channel-num">3</div><h3>法務部行政執行署 不動產拍賣</h3></div>
+      <div class="channel-desc">欠稅、罰鍰等公法債務被強制執行的不動產拍賣公告，物件較冷門、關注的人不多。台北市依行政區分屬士林分署與臺北分署，新北市統一由新北分署管轄。</div>
+      <div class="channel-links">
+        <a href="https://www.tpkonsale.moj.gov.tw/" target="_blank" rel="noopener">行政執行署拍賣公告查詢系統（全國）</a>
+        <a href="https://www.sly.moj.gov.tw/234431/234451/" target="_blank" rel="noopener">士林分署（士林・北投・內湖・中山・大同等）</a>
+        <a href="https://www.tpy.moj.gov.tw/234661/234739/234740/Lpsimplelist" target="_blank" rel="noopener">臺北分署（中正・萬華・大安・信義等）</a>
+        <a href="https://www.pcy.moj.gov.tw/234159/1326401/Normalnodelist" target="_blank" rel="noopener">新北分署（新北市全轄）</a>
+      </div>
+    </div>
+
+    <div class="channel">
+      <div class="channel-head"><div class="channel-num">4</div><h3>縣市政府財政局 公有土地／房屋標售</h3></div>
+      <div class="channel-desc">市府因都更分回、標售外縣市空屋空地等原因不定期公開標售市有不動產，偶爾會出現市場上罕見的案件。</div>
+      <div class="channel-links">
+        <a href="https://dof.gov.taipei/Content_List.aspx?n=5918D408ADB35F1F" target="_blank" rel="noopener">台北市政府財政局 不動產標租售</a>
+        <a href="https://www.finance.ntpc.gov.tw/home.jsp?id=d35853b00c66a22c" target="_blank" rel="noopener">新北市政府財政局 標售專區</a>
+      </div>
+    </div>
+
+    <div class="channel">
+      <div class="channel-head"><div class="channel-num">5</div><h3>財政部國有財產署 標售國有房地</h3></div>
+      <div class="channel-desc">國家持有的非公用不動產（土地、房屋）定期公開標售，台北市與新北市皆由國產署「北區分署」管轄。</div>
+      <div class="channel-links">
+        <a href="https://esvc.fnp.gov.tw/transction" target="_blank" rel="noopener">國產署便民服務網 標售不動產資訊</a>
+        <a href="https://www.fnp.gov.tw/fnpn" target="_blank" rel="noopener">國有財產署北區分署（台北・新北轄區）</a>
+      </div>
+      <div class="channel-note">北區分署轄區涵蓋：台北市、新北市、基隆市、桃園市、宜蘭縣、花蓮縣、金門縣、連江縣。</div>
     </div>
   </section>
 
