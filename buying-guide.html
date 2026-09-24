@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>買房攻略｜購屋流程 ‧ 費用試算 ‧ 注意事項</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Microsoft JhengHei', 'PingFang TC', Arial, sans-serif;
+      background: #f7f5f0;
+      color: #2d3748;
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #7c4a1e 0%, #b7791f 100%);
+      color: white;
+      padding: 20px 24px;
+    }
+    header .inner { max-width: 1080px; margin: 0 auto; }
+    header h1 { font-size: 22px; letter-spacing: 1px; }
+    header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+    nav {
+      background: #fffaf0;
+      border-bottom: 1px solid #f0e2c8;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav .inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 0 24px;
+    }
+    nav a {
+      display: inline-block;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #7c4a1e;
+      text-decoration: none;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    nav a:hover { border-bottom-color: #dd9933; background: #fef3e0; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 24px; }
+
+    section { margin-bottom: 28px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #7c4a1e;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f0e2c8;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 20px;
+    }
+
+    /* ===== 流程 Steps ===== */
+    .steps { display: grid; gap: 10px; }
+    .step {
+      display: flex;
+      gap: 14px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 14px 18px;
+      align-items: flex-start;
+    }
+    .step-num {
+      flex: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #dd9933;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    .step-body h3 { font-size: 14.5px; color: #2d3748; margin-bottom: 3px; }
+    .step-body p { font-size: 12.5px; color: #718096; }
+
+    /* ===== 費用表 ===== */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #edf2f7; }
+    th { color: #7c4a1e; font-size: 12px; background: #fffaf0; }
+    td.amt { color: #b7791f; font-weight: 600; white-space: nowrap; }
+    tr:last-child td { border-bottom: none; }
+
+    /* ===== 試算機 ===== */
+    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 760px) { .calc-grid { grid-template-columns: 1fr; } }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12.5px; font-weight: 600; color: #4a5568; margin-bottom: 5px; }
+    .field .row { display: flex; align-items: center; gap: 8px; }
+    .field input[type=number] {
+      flex: 1;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+    }
+    .field input[type=number]:focus { border-color: #dd9933; box-shadow: 0 0 0 3px rgba(221,153,51,0.15); }
+    .field input[type=range] { width: 100%; accent-color: #dd9933; }
+    .field .unit { font-size: 12px; color: #a0aec0; white-space: nowrap; }
+    .field .rangeval { font-size: 12px; color: #b7791f; font-weight: 600; min-width: 46px; text-align: right; }
+
+    .result-box {
+      background: #fffaf0;
+      border: 1px solid #f0e2c8;
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .result-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; color: #4a5568; }
+    .result-row .val { font-weight: 600; color: #7c4a1e; }
+    .result-divider { border-top: 1px dashed #f0e2c8; margin: 8px 0; }
+    .result-highlight { font-size: 16px; font-weight: bold; color: #7c4a1e; }
+    .result-highlight .val { font-size: 20px; }
+    .calc-note { font-size: 11px; color: #a0aec0; margin-top: 10px; }
+
+    /* ===== 注意事項 ===== */
+    .warn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 760px) { .warn-grid { grid-template-columns: 1fr; } }
+    .warn-item {
+      background: white;
+      border-left: 4px solid #dd9933;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      padding: 12px 14px;
+    }
+    .warn-item h4 { font-size: 13.5px; color: #7c4a1e; margin-bottom: 4px; }
+    .warn-item p { font-size: 12.5px; color: #718096; }
+
+    /* ===== 檢查清單 ===== */
+    .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+    @media (max-width: 760px) { .checklist { grid-template-columns: 1fr; } }
+    .checklist label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #4a5568;
+      padding: 6px 4px;
+      border-bottom: 1px dashed #edf2f7;
+      cursor: pointer;
+    }
+    .checklist input[type=checkbox] { accent-color: #dd9933; width: 16px; height: 16px; }
+    .checklist input[type=checkbox]:checked + span { color: #a0aec0; text-decoration: line-through; }
+    .checklist-actions { margin-top: 10px; display: flex; gap: 8px; }
+    .btn {
+      padding: 7px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+      font-family: inherit;
+      background: #edf2f7;
+      color: #4a5568;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: #e2e8f0; }
+    .btn-primary { background: #dd9933; color: white; }
+    .btn-primary:hover { background: #b7791f; }
+
+    /* ===== FAQ ===== */
+    .faq-item { border-bottom: 1px solid #edf2f7; padding: 12px 0; }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-size: 14px; font-weight: 600; color: #2d3748; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q .arrow { transition: transform 0.2s; color: #dd9933; font-size: 12px; }
+    .faq-q.open .arrow { transform: rotate(90deg); }
+    .faq-a { font-size: 13px; color: #718096; margin-top: 8px; display: none; }
+    .faq-a.open { display: block; }
+
+    footer { text-align: center; font-size: 11.5px; color: #a0aec0; padding: 20px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>🏠 買房攻略</h1>
+    <div class="subtitle">購屋流程、相關費用、貸款試算與注意事項一次搞懂</div>
+  </div>
+</header>
+
+<nav>
+  <div class="inner">
+    <a href="#process">購屋流程</a>
+    <a href="#costs">相關費用</a>
+    <a href="#calc">貸款試算</a>
+    <a href="#pitfalls">注意事項</a>
+    <a href="#checklist">看屋檢查清單</a>
+    <a href="#faq">常見問答</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ===== 購屋流程 ===== -->
+  <section id="process">
+    <div class="section-title">📋 購屋流程 8 步驟</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>評估財務狀況</h3>
+          <p>盤點存款、收入穩定度、現有負債，抓出可負擔總價與可準備的自備款（建議至少房價 2~3 成），並試算貸款後每月還款負擔（建議不超過月收入的 1/3）。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>確認需求與區域</h3>
+          <p>自住或投資、坪數與格局、學區、通勤動線、生活機能、未來重劃或建設題材，列出「必要條件」與「加分條件」清單。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>看屋比價</h3>
+          <p>查詢「實價登錄」了解周邊成交行情，多看幾間同類型物件建立比較基準，避免被單一物件的開價迷惑。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>議價與斡旋 / 要約</h3>
+          <p>依實價登錄行情與屋況缺失出價，透過斡旋金或要約書表達購買誠意，議定成交價格。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>簽訂買賣契約</h3>
+          <p>確認契約審閱期（至少 5 天）已使用，核對產權、坪數、付款條件、交屋日期，支付簽約款（通常為總價 10% 左右）。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h3>申請房貸、對保</h3>
+          <p>多家銀行比較利率與成數，備妥財力證明送件審核，核貸後至銀行完成對保手續。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <h3>用印、完稅</h3>
+          <p>買賣雙方用印後，繳納契稅、印花稅等稅費，並辦理所有權移轉登記（過戶）。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">8</div>
+        <div class="step-body">
+          <h3>交屋點交</h3>
+          <p>核對水電瓦斯錶度數與費用結清、設備清單、鑰匙與保固文件，確認屋況與簽約時一致後正式交屋。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 相關費用 ===== -->
+  <section id="costs">
+    <div class="section-title">💰 購屋相關費用</div>
+    <div class="card">
+      <table>
+        <tr><th>項目</th><th>說明</th><th>參考金額 / 比例</th></tr>
+        <tr><td>自備款</td><td>房價扣除貸款成數後需自行支付的部分</td><td class="amt">房價的 20% ~ 30%</td></tr>
+        <tr><td>仲介服務費</td><td>買方通常需支付的仲介費用</td><td class="amt">成交價的 1% ~ 2%</td></tr>
+        <tr><td>契稅</td><td>依房屋evaluated現值課徵（新屋較低）</td><td class="amt">房屋現值 × 6%（自用可能減徵）</td></tr>
+        <tr><td>印花稅</td><td>買賣契約書用印花稅</td><td class="amt">契價 × 0.1%</td></tr>
+        <tr><td>代書 / 地政士費</td><td>過戶登記、貸款設定等代辦費用</td><td class="amt">約 NT$ 1.5~3 萬</td></tr>
+        <tr><td>貸款相關費用</td><td>開辦費、鑑價費、設定規費、火險與地震險</td><td class="amt">約 NT$ 1~3 萬</td></tr>
+        <tr><td>裝潢 / 搬家費</td><td>視屋況與裝潢需求而定，中古屋通常較高</td><td class="amt">依需求彈性抓列</td></tr>
+        <tr><td>房屋稅（持有稅）</td><td>每年課徵，稅率依自用或非自用不同</td><td class="amt">每年繳納</td></tr>
+        <tr><td>地價稅（持有稅）</td><td>依公告地價課徵，每年繳納</td><td class="amt">每年繳納</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== 貸款試算 ===== -->
+  <section id="calc">
+    <div class="section-title">🧮 房貸試算機</div>
+    <div class="card">
+      <div class="calc-grid">
+        <div>
+          <div class="field">
+            <label>房屋總價（萬元）</label>
+            <div class="row">
+              <input type="number" id="price" value="1200" min="0" step="10" oninput="calc()">
+              <span class="unit">萬</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>自備款比例</label>
+            <div class="row">
+              <input type="range" id="downPct" value="30" min="0" max="80" step="1" oninput="calc()">
+              <span class="rangeval" id="downPctVal">30%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>貸款年限</label>
+            <div class="row">
+              <input type="range" id="years" value="30" min="1" max="40" step="1" oninput="calc()">
+              <span class="rangeval" id="yearsVal">30 年</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>貸款年利率</label>
+            <div class="row">
+              <input type="range" id="rate" value="2.1" min="0.5" max="6" step="0.05" oninput="calc()">
+              <span class="rangeval" id="rateVal">2.10%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-box" id="resultBox">
+          <div class="result-row"><span>貸款金額：</span><span class="val" id="rLoan">—</span></div>
+          <div class="result-row"><span>自備款金額：</span><span class="val" id="rDown">—</span></div>
+          <div class="result-divider"></div>
+          <div class="result-row result-highlight"><span>每月本息攤還：</span><span class="val" id="rMonthly">—</span></div>
+          <div class="result-divider"></div>
+          <div class="result-row"><span>還款總利息：</span><span class="val" id="rInterest">—</span></div>
+          <div class="result-row"><span>總還款金額（本金+利息）：</span><span class="val" id="rTotal">—</span></div>
+          <div class="calc-note">※ 採本息平均攤還法試算，僅供參考，實際核貸成數、利率與費用以銀行核准條件為準。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 注意事項 ===== -->
+  <section id="pitfalls">
+    <div class="section-title">⚠️ 常見注意事項與陷阱</div>
+    <div class="warn-grid">
+      <div class="warn-item">
+        <h4>凶宅 / 輻射屋 / 海砂屋</h4>
+        <p>可上網查詢凶宅資料庫，並請賣方提供輻射屋與海砂屋檢測證明，簽約前明確約定擔保條款。</p>
+      </div>
+      <div class="warn-item">
+        <h4>產權是否清楚</h4>
+        <p>調閱最新謄本確認有無查封、抵押權、他項權利，並核對所有權人與賣方身分是否一致。</p>
+      </div>
+      <div class="warn-item">
+        <h4>漏水壁癌</h4>
+        <p>雨天或近期看屋，留意天花板、牆角、窗框有無水漬與壁癌，必要時要求賣方出具漏水保固切結。</p>
+      </div>
+      <div class="warn-item">
+        <h4>嫌惡設施</h4>
+        <p>留意鄰近是否有高壓電塔、基地台、殯儀館、垃圾場、宮廟等可能影響居住品質或未來轉售的設施。</p>
+      </div>
+      <div class="warn-item">
+        <h4>停車位產權</h4>
+        <p>確認車位是「獨立產權」、「共有持分」或「管理使用權」，並核對車位大小與位置是否符合需求。</p>
+      </div>
+      <div class="warn-item">
+        <h4>公設比過高</h4>
+        <p>新成屋公設比普遍偏高，留意實際可使用坪數，並了解公設項目與後續管理維護狀況。</p>
+      </div>
+      <div class="warn-item">
+        <h4>建照 / 使照是否合法</h4>
+        <p>確認是否有合法使用執照，避免買到違建加蓋或頂樓加蓋部分，日後恐面臨拆除風險。</p>
+      </div>
+      <div class="warn-item">
+        <h4>契約審閱期</h4>
+        <p>依規定買賣契約至少有 5 天審閱期，務必詳讀條款內容，勿因急促簽約而忽略重要細節。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 看屋檢查清單 ===== -->
+  <section id="checklist">
+    <div class="section-title">✅ 看屋 / 驗屋檢查清單</div>
+    <div class="card">
+      <div class="checklist" id="checklistBox">
+        <label><input type="checkbox"><span>牆面 / 天花板有無漏水、壁癌痕跡</span></label>
+        <label><input type="checkbox"><span>樑柱、牆面有無明顯裂縫</span></label>
+        <label><input type="checkbox"><span>水壓是否穩定、排水是否順暢</span></label>
+        <label><input type="checkbox"><span>電路、插座、開關是否正常運作</span></label>
+        <label><input type="checkbox"><span>採光通風、座向格局是否符合需求</span></label>
+        <label><input type="checkbox"><span>周邊噪音（馬路、鐵軌、工地）狀況</span></label>
+        <label><input type="checkbox"><span>鄰居 / 樓上樓下住戶狀況</span></label>
+        <label><input type="checkbox"><span>管委會運作、管理費用與公共基金</span></label>
+        <label><input type="checkbox"><span>停車位是否方便、產權是否清楚</span></label>
+        <label><input type="checkbox"><span>生活機能（市場、超商、醫療、學校）</span></label>
+        <label><input type="checkbox"><span>通勤動線與大眾運輸便利性</span></label>
+        <label><input type="checkbox"><span>建物權狀、謄本、土地使用分區確認</span></label>
+      </div>
+      <div class="checklist-actions">
+        <button class="btn btn-primary" onclick="resetChecklist()">重置清單</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 常見問答 ===== -->
+  <section id="faq">
+    <div class="section-title">💬 常見問答</div>
+    <div class="card" id="faqBox"></div>
+  </section>
+
+</div>
+
+<footer>本頁內容僅供一般性參考，實際交易請諮詢地政士、律師或專業不動產顧問。</footer>
+
+<script>
+// ===== 貸款試算 =====
+function fmt(n) {
+  return Math.round(n).toLocaleString('zh-TW');
+}
+
+function calc() {
+  const price   = parseFloat(document.getElementById('price').value) || 0;   // 萬元
+  const downPct = parseFloat(document.getElementById('downPct').value) || 0; // %
+  const years   = parseFloat(document.getElementById('years').value) || 0;
+  const rate    = parseFloat(document.getElementById('rate').value) || 0;    // %
+
+  document.getElementById('downPctVal').textContent = `${downPct}%`;
+  document.getElementById('yearsVal').textContent = `${years} 年`;
+  document.getElementById('rateVal').textContent = `${rate.toFixed(2)}%`;
+
+  const priceNT = price * 10000;
+  const downNT  = priceNT * (downPct / 100);
+  const loanNT  = priceNT - downNT;
+
+  const n = years * 12;
+  const r = (rate / 100) / 12;
+
+  let monthly = 0;
+  if (loanNT > 0 && n > 0) {
+    monthly = r === 0
+      ? loanNT / n
+      : loanNT * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+
+  const totalPay = monthly * n;
+  const totalInterest = totalPay - loanNT;
+
+  document.getElementById('rLoan').textContent = `NT$ ${fmt(loanNT)}`;
+  document.getElementById('rDown').textContent = `NT$ ${fmt(downNT)}`;
+  document.getElementById('rMonthly').textContent = `NT$ ${fmt(monthly)}`;
+  document.getElementById('rInterest').textContent = `NT$ ${fmt(totalInterest)}`;
+  document.getElementById('rTotal').textContent = `NT$ ${fmt(totalPay)}`;
+}
+
+// ===== 檢查清單重置 =====
+function resetChecklist() {
+  document.querySelectorAll('#checklistBox input[type=checkbox]').forEach(cb => cb.checked = false);
+}
+
+// ===== FAQ =====
+const FAQS = [
+  {
+    q: '預售屋和中古屋該怎麼選？',
+    a: '預售屋可依工程期分期支付款項、可依需求客變格局，但需承擔交屋前的營建風險與時間不確定性；中古屋所見即所得、可立即入住，但需留意屋齡、漏水與裝潢整新的額外支出。可依自身資金規劃與入住時程需求評估。'
+  },
+  {
+    q: '自備款不足可以買房嗎？',
+    a: '銀行貸款成數通常依物件與個人信用條件核准，一般約可貸 7~8 成，仍須準備至少 2~3 成自備款。若資金不足，建議先增加儲蓄或考慮總價較低的物件，避免貸款壓力過高影響生活品質。'
+  },
+  {
+    q: '什麼是斡旋金和要約書？',
+    a: '斡旋金是買方委託仲介向賣方議價時所支付的一筆款項，作為表達購買誠意的保證，議價成功則轉為訂金，未成交則應無息退還；要約書則不需先付款，僅以書面提出購買條件，效力較弱但風險較低。'
+  },
+  {
+    q: '房貸利率該怎麼比較？',
+    a: '不只看名目利率，也要留意是機動利率或固定利率、綁約期間、提前還款違約金、以及是否有其他優惠（如新青安貸款等政策性房貸）。建議多家銀行詢價比較，並確認總費用年百分率（APR）。'
+  },
+  {
+    q: '交屋前後需要注意什麼？',
+    a: '交屋前應與賣方一同點交房屋現況、核對設備清單與保固文件、結清水電瓦斯與管理費；交屋後應儘速辦理房屋稅籍、水電過戶、以及火險/地震險保單生效日確認。'
+  }
+];
+
+function renderFaq() {
+  const box = document.getElementById('faqBox');
+  box.innerHTML = FAQS.map((f, i) => `
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(${i})" id="faqQ${i}">
+        <span>${f.q}</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="faq-a" id="faqA${i}">${f.a}</div>
+    </div>
+  `).join('');
+}
+
+function toggleFaq(i) {
+  document.getElementById(`faqQ${i}`).classList.toggle('open');
+  document.getElementById(`faqA${i}`).classList.toggle('open');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  calc();
+  renderFaq();
+});
+</script>
+
+</body>
+</html>
