@@ -558,14 +558,16 @@ function clean(s) {
 
 function extractOrigin(t) {
   let m;
-  m = t.match(/起運(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/(?:寄送?|發貨)(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/出發(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/Origin[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
-  m = t.match(/From[：:\s]+([^\n,，\t]{2,30})/i); if (m) return clean(m[1]);
-  m = t.match(/Ship(?:ping)?(?:\s+from)?[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
-  // 自然語言
-  m = t.match(/從\s*([一-鿿\w]{2,15})\s*(?:寄|運|送|出發)/); if (m) return clean(m[1]);
+  // 結構化標籤（限同行：用 [ \t]* 取代 \s* 避免跨行誤抓）
+  m = t.match(/起運(?:地|地點)?[：:﹕][ \t]*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/(?:寄送?|發貨)(?:地|地點)?[：:﹕][ \t]*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/出發(?:地|地點)?[：:﹕][ \t]*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/Origin[：:][ \t]*([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  m = t.match(/From[：:][ \t]*([^\n,，\t]{2,30})/i); if (m) return clean(m[1]);
+  m = t.match(/Ship(?:ping)?(?:[ \t]+from)?[：:][ \t]*([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  // 自然語言：「從X寄/運/送/出發」及「從X到Y」
+  m = t.match(/從[ \t]*([一-鿿\w]{2,10})[ \t]*(?:寄|運|送|出發)/); if (m) return clean(m[1]);
+  m = t.match(/從[ \t]*([一-鿿\w]{2,10})[ \t]*到/); if (m) return clean(m[1]);
   m = t.match(/(?:from|departure)[：:\s]+([A-Za-z,\s]{3,30}?)(?:\s+to\b|\n)/i); if (m) return clean(m[1]);
   m = t.match(/提貨(?:地址)?[：:\s]+([^\n,，]{2,30})/); if (m) return clean(m[1]);
   m = t.match(/(台灣|台北|桃園|新竹|苗栗|台中|彰化|南投|雲林|嘉義|台南|高雄|屏東|宜蘭|花蓮|台東|基隆|中國|大陸|上海|廣州|深圳|北京|日本|韓國|香港)\s*[Tt][Oo]/); if (m) return clean(m[1]);
@@ -574,17 +576,21 @@ function extractOrigin(t) {
 
 function extractDest(t) {
   let m;
-  m = t.match(/目的(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/到達(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/(?:收件|送達)(?:地|地點)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/Dest(?:ination)?[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
+  // 結構化標籤（限同行）
+  m = t.match(/目的(?:地|地點)?[：:﹕][ \t]*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/到達(?:地|地點)?[：:﹕][ \t]*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/(?:收件|送達)(?:地|地點)?[：:﹕][ \t]*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
+  m = t.match(/Dest(?:ination)?[：:][ \t]*([^\n,，]{2,30})/i); if (m) return clean(m[1]);
   m = t.match(/[Tt][Oo]\s*(美國|日本|韓國|英國|德國|法國|澳洲|加拿大|香港|澳門|新加坡|越南|泰國|印尼|菲律賓|馬來西亞|印度|中國|大陸|台灣|歐洲|中東)/); if (m) return clean(m[1]);
   m = t.match(/送貨(?:地址)?[：:\s]+([^\n,，]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/\bTo[：:\s]+([^\n,，\t]{2,30})/i); if (m) return clean(m[1]);
+  // To: 需要冒號作為分隔（避免把 "to ship" 誤判為目的地）
+  m = t.match(/\bTo[：:][ \t]*([^\n,，\t]{2,30})/i); if (m) return clean(m[1]);
   m = t.match(/Deliver(?:y)?\s+to[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
-  // 自然語言
-  m = t.match(/(?:寄|送|運)到\s*([一-鿿\w]{2,15})/); if (m) return clean(m[1]);
-  m = t.match(/\bto\s+([A-Za-z,\s]{3,30}?)(?:\n|,|$)/i); if (m) return clean(m[1]);
+  // 自然語言：「從X到Y」「寄/送/運到Y」
+  m = t.match(/從[一-鿿\w]{2,10}[ \t]*到[ \t]*([一-鿿（）\w]{2,20})/); if (m) return clean(m[1]);
+  m = t.match(/(?:寄|送|運)到[ \t]*([一-鿿\w]{2,15})/); if (m) return clean(m[1]);
+  // 純英文自然語言「to CityName」：終止符加入句點，避免跨句
+  m = t.match(/\bto\s+([A-Za-z][A-Za-z ,]{2,28}?)(?:[,.\n]|$)/i); if (m) return clean(m[1]);
   return '';
 }
 
@@ -596,8 +602,9 @@ function extractCommodity(t) {
   m = t.match(/Commodity[：:\s]+([^\n,，]{2,40})/i); if (m) return clean(m[1]);
   m = t.match(/(?:Product|Goods?|Item)[s]?[：:\s]+([^\n,，]{2,40})/i); if (m) return clean(m[1]);
   m = t.match(/Description[：:\s]+([^\n,，]{2,40})/i); if (m) return clean(m[1]);
-  // 自然語言：「是電子零件」「一批服裝」
-  m = t.match(/(?:是|有一批|一批|一些)\s*([一-鿿]{2,15})/); if (m) return clean(m[1]);
+  // 自然語言：優先匹配「是X」（短詞），再匹配「一批/一些X」，避免「有一批貨要…」整句誤抓
+  m = t.match(/是\s*([一-鿿]{2,8})/); if (m) return clean(m[1]);
+  m = t.match(/(?:一批|一些)\s*([一-鿿]{2,8})/); if (m) return clean(m[1]);
   return '';
 }
 
@@ -605,9 +612,10 @@ function extractPieces(t) {
   let m;
   m = t.match(/件數[：:﹕]\s*([^\n,，、。]{1,20})/); if (m) return clean(m[1]);
   m = t.match(/(?:數量|箱數|托數|包裹數)[：:﹕]\s*([^\n,，、。]{1,20})/); if (m) return clean(m[1]);
-  m = t.match(/(?:Pcs?|Pieces?|Qty|Quantity|Cartons?|Ctns?)[：:\s.]+([^\n,，]{1,20})/i); if (m) return clean(m[1]);
-  // 數字 + 單位
-  m = t.match(/(\d+(?:\.\d+)?)\s*(箱|件|個|托|板|pcs|cartons?|ctns?|pieces?)/i);
+  // 標籤格式：分隔符不含換行，避免把下一行的重量誤抓為件數
+  m = t.match(/(?:Pcs?|Pieces?|Qty|Quantity|Cartons?|Ctns?)[：: \t.]+([^\n,，]{1,20})/i); if (m) return clean(m[1]);
+  // 數字 + 單位（擴充更多單位類型）
+  m = t.match(/(\d+(?:\.\d+)?)\s*(箱|件|個|托|板|pcs|cartons?|ctns?|pieces?|envelopes?|packages?|bags?|drums?|rolls?|pallets?|units?)/i);
   if (m) return `${m[1]} ${m[2]}`;
   return '';
 }
@@ -617,7 +625,8 @@ function extractWeight(t) {
   m = t.match(/(?:毛重|實重|重量)[：:.\s]*(\d+(?:\.\d+)?)\s*(?:kg|kgs|KG|公斤)?/i); if (m) return m[1];
   m = t.match(/G\.?W\.?[：:\s]+(\d+(?:\.\d+)?)\s*(?:kg|kgs)?/i); if (m) return m[1];
   m = t.match(/Weight[：:\s]+(\d+(?:\.\d+)?)\s*(?:kg|kgs)?/i); if (m) return m[1];
-  m = t.match(/(\d+(?:\.\d+)?)\s*(?:kg|kgs|公斤|千克)/i); if (m) return m[1];
+  // 有標籤的重量：允許無單位（「重量：250」視為 kg）
+  m = t.match(/(\d+(?:\.\d+)?)\s*(?:kg|kgs|公斤|千克|kilograms?)/i); if (m) return m[1];
   return '';
 }
 
@@ -638,13 +647,24 @@ function extractDims(t) {
   return { L: '', W: '', H: '' };
 }
 
+// TODO(backlog): 「Sea Freight FCL/LCL」帶完整字串時，
+//   Service 標籤直接 return 原文而非對應「海運」。
+//   待下一版詢報價後端整合時一併處理。
+function normalizeService(s) {
+  if (!s) return s;
+  // 聯邦快遞 → FedEx
+  s = s.replace(/聯邦快遞/g, 'FedEx');
+  // 已由關鍵字區塊統一處理的別名可在此擴充
+  return s.trim();
+}
+
 function extractService(t) {
   let m;
-  m = t.match(/服務(?:類型|方式|項目)?[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/(?:運輸|配送|快遞)?方式[：:﹕]\s*([^\n,，、。]{2,30})/); if (m) return clean(m[1]);
-  m = t.match(/Service[：:\s]+([^\n,，]{2,30})/i); if (m) return clean(m[1]);
-  m = t.match(/Carrier[：:\s]+([^\n,，]{2,20})/i); if (m) return clean(m[1]);
-  // 關鍵字
+  m = t.match(/服務(?:類型|方式|項目)?[：:﹕][ \t]*([^\n,，、。]{2,30})/); if (m) return normalizeService(clean(m[1]));
+  m = t.match(/(?:運輸|配送|快遞)?方式[：:﹕][ \t]*([^\n,，、。]{2,30})/); if (m) return normalizeService(clean(m[1]));
+  m = t.match(/Service[：:][ \t]*([^\n,，]{2,30})/i); if (m) return normalizeService(clean(m[1]));
+  m = t.match(/Carrier[：:][ \t]*([^\n,，]{2,20})/i); if (m) return normalizeService(clean(m[1]));
+  // 關鍵字掃描
   const svc = [];
   if (/\bDHL\b/i.test(t)) svc.push('DHL');
   if (/\bUPS\b/i.test(t)) svc.push('UPS');
