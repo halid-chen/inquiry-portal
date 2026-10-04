@@ -257,6 +257,111 @@
     @media (max-width: 860px) {
       .container { grid-template-columns: 1fr; }
     }
+
+    /* ── 附加費模組 ── */
+    .surcharge-panel {
+      max-width: 1440px;
+      margin: 0 16px 16px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .sur-header {
+      background: linear-gradient(135deg, #744210 0%, #c05621 100%);
+      color: white;
+      padding: 11px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .sur-header .sur-date { font-size: 11px; opacity: .8; }
+    .sur-body { padding: 14px 18px; }
+    .sur-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 860px) { .sur-grid { grid-template-columns: 1fr; } }
+
+    .sur-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .sur-card.active  { border-color: #f6ad55; }
+    .sur-card.inactive { opacity: .55; }
+    .sur-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .sur-card.active  .sur-card-head { background: #fffaf0; color: #7b341e; }
+    .sur-card.inactive .sur-card-head { background: #f7fafc; color: #718096; }
+    .sur-period { font-size: 10px; font-weight: normal; opacity: .8; }
+    .sur-status-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+    .badge-on  { background: #c6f6d5; color: #22543d; }
+    .badge-off { background: #e2e8f0; color: #718096; }
+    .sur-card-body { padding: 10px 12px; font-size: 12px; }
+    .sur-row { display: flex; justify-content: space-between; padding: 2px 0; color: #4a5568; }
+    .sur-row .sv  { font-weight: 600; color: #c05621; }
+    .sur-row .sv.ok { color: #2b6cb0; }
+    .sur-divider { border-top: 1px dashed #e2e8f0; margin: 6px 0; }
+
+    /* 每件附加費勾選列 */
+    .sur-piece-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #4a5568;
+      margin-bottom: 8px;
+    }
+    .sur-check-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sur-check-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: all .15s;
+    }
+    .sur-check-item:hover { background: #ebf8ff; border-color: #90cdf4; }
+    .sur-check-item.checked { background: #fff5f0; border-color: #f6ad55; color: #7b341e; font-weight: 600; }
+    .sur-check-item.inactive-item { opacity: .4; cursor: not-allowed; }
+    .sur-check-item input[type=checkbox] { accent-color: #c05621; }
+
+    /* 附加費試算結果 */
+    .sur-result {
+      margin-top: 12px;
+      background: #fffaf0;
+      border: 1px solid #f6ad55;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+    }
+    .sur-result-title { font-weight: bold; color: #7b341e; margin-bottom: 8px; font-size: 13px; }
+    .sur-result-row { display: flex; justify-content: space-between; padding: 2px 0; }
+    .sur-result-total { font-size: 14px; font-weight: bold; color: #c05621; }
+    .sur-warn { color: #d69e2e; font-size: 11px; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -266,8 +371,32 @@
     <h1>📦 詢價訊息解析入口</h1>
     <div class="subtitle">貼上 Line / WhatsApp / Email 詢價訊息，自動整理成報價資料</div>
   </div>
-  <span class="version-badge">免費本地版 v1.0</span>
+  <span class="version-badge">免費本地版 v1.1</span>
 </header>
+
+<!-- ===== 旺季附加費模組 ===== -->
+<div class="surcharge-panel" id="surPanel">
+  <div class="sur-header">
+    <span>🔥 旺季附加費試算（DHL / UPS / FedEx）</span>
+    <span class="sur-date" id="surDateLabel"></span>
+  </div>
+  <div class="sur-body">
+
+    <!-- 三業者 per-kg 附加費卡片 -->
+    <div class="sur-grid" id="surGrid">
+      <!-- 由 JS 渲染 -->
+    </div>
+
+    <!-- 每件附加費選單 -->
+    <div class="sur-piece-title">📦 每件附加費（可複選，依實際情況勾選）：</div>
+    <div class="sur-check-grid" id="surCheckGrid">
+      <!-- 由 JS 渲染 -->
+    </div>
+
+    <!-- 試算結果 -->
+    <div class="sur-result" id="surResult" style="display:none;"></div>
+  </div>
+</div>
 
 <div class="container">
 
@@ -726,7 +855,262 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('msgInput').addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.ctrlKey) parse();
   });
+  initSurcharge();
 });
+
+// =====================================================
+//  旺季附加費模組
+//  資料來源：三家旺季附加費_整合總表_v2.xlsx 交叉確認版
+// =====================================================
+
+// ── Per-kg 旺季附加費定義 ──
+// startM/startD：啟用月日；endM/endD：截止月日（跨年時 end 在次年）
+// zones: { 區域描述: NTD/kg }  (依 Excel 各區費率)
+const PKG_SURCHARGES = [
+  {
+    carrier: 'DHL',
+    label: 'DHL 旺季附加費',
+    startM: 10, startD: 1,
+    endM: 2, endD: 5,
+    color: '#d32011',
+    zones: {
+      '歐洲/北美/澳洲':  53,
+      '亞太/中東':       28,
+      '東南亞':          18,
+      '香港/澳門':        4,
+    },
+    note: '依目的地區域計費，每公斤加收'
+  },
+  {
+    carrier: 'FedEx',
+    label: 'FedEx 旺季附加費',
+    startM: 9, startD: 21,
+    endM: 2, endD: 5,
+    color: '#4d148c',
+    zones: {
+      '優先：歐美澳':   83,
+      '優先：亞太':     52,
+      '優先：東南亞':   30,
+      '經濟：歐美澳':   68,
+      '經濟：亞太':     40,
+      '經濟：東南亞':    0,
+    },
+    note: '優先/經濟費率不同，依服務等級計費'
+  },
+  {
+    carrier: 'UPS',
+    label: 'UPS 旺季附加費',
+    startM: 9, startD: 27,
+    endM: 2, endD: 6,
+    color: '#351c15',
+    zones: {
+      '歐美澳加': 103,
+      '亞太':      52,
+      '東南亞':    28,
+      '香港':       3,
+    },
+    note: '依目的地區域計費，每公斤加收'
+  },
+];
+
+// ── 每件附加費定義（SUR_DEF）──
+// active：依日期判斷；perPiece：每件 NTD
+const PIECE_SURCHARGES = [
+  // FedEx（截圖標示「未轉SUR_DEF」→ 現已正式定義）
+  {
+    id: 'fedex_ahs',
+    carrier: 'FedEx',
+    label: 'FedEx AHS 類（住宅/遠端）',
+    startM: 9, startD: 21, endM: 2, endD: 5,
+    perPiece: 165,
+    currency: 'NTD',
+    desc: '寄往住宅地址或偏遠地區時加收',
+    surDefId: 'FEDEX_PSS_AHS',
+  },
+  {
+    id: 'fedex_oversize',
+    carrier: 'FedEx',
+    label: 'FedEx 超大尺寸',
+    startM: 9, startD: 21, endM: 2, endD: 5,
+    perPiece: 165,
+    currency: 'NTD',
+    desc: '任一邊 > 120cm 或材積重 > 68kg',
+    surDefId: 'FEDEX_PSS_OVERSIZE',
+  },
+  {
+    id: 'fedex_irregular',
+    carrier: 'FedEx',
+    label: 'FedEx 非常規包裹',
+    startM: 9, startD: 21, endM: 2, endD: 5,
+    perPiece: 165,
+    currency: 'NTD',
+    desc: '圓形、不規則形狀、無外箱裸運等',
+    surDefId: 'FEDEX_PSS_IRREGULAR',
+  },
+  // UPS（已確認 ✓）
+  {
+    id: 'ups_ahs',
+    carrier: 'UPS',
+    label: 'UPS AHS（住宅附加）',
+    startM: 9, startD: 27, endM: 2, endD: 6,
+    perPiece: 56,
+    currency: 'NTD',
+    desc: '寄往住宅地址加收',
+    surDefId: 'UPS_PSS_AHS',
+  },
+  {
+    id: 'ups_large',
+    carrier: 'UPS',
+    label: 'UPS 大型包裹',
+    startM: 9, startD: 27, endM: 2, endD: 6,
+    perPiece: 197,
+    currency: 'NTD',
+    desc: '三邊和 > 300cm 或最長邊 > 150cm',
+    surDefId: 'UPS_PSS_LARGE',
+  },
+  {
+    id: 'ups_overlimit',
+    carrier: 'UPS',
+    label: 'UPS 超上限',
+    startM: 9, startD: 27, endM: 2, endD: 6,
+    perPiece: 6256,
+    currency: 'NTD',
+    desc: '超過 UPS 最大尺寸限制',
+    surDefId: 'UPS_PSS_OVERLIMIT',
+  },
+  // DHL（Excel 顯示無每件附加費，留為未來擴充）
+];
+
+// ── 日期判斷輔助 ──
+function isCarrierActive(sur, today) {
+  const y = today.getFullYear();
+  const m = today.getMonth() + 1; // 1-based
+  const d = today.getDate();
+  // 起始在當年，截止在次年（跨年期間）
+  const start = new Date(y, sur.startM - 1, sur.startD);
+  // 截止日：若截止月 < 起始月 → 次年
+  const endYear = sur.endM < sur.startM ? y + 1 : y;
+  const end = new Date(endYear, sur.endM - 1, sur.endD);
+  return today >= start && today <= end;
+}
+
+// ── 初始化附加費模組 ──
+function initSurcharge() {
+  const today = new Date();
+  const fmt = d => `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  document.getElementById('surDateLabel').textContent = `今日：${fmt(today)}`;
+
+  // 渲染三業者卡片
+  const grid = document.getElementById('surGrid');
+  grid.innerHTML = PKG_SURCHARGES.map(sur => {
+    const on = isCarrierActive(sur, today);
+    const cls = on ? 'active' : 'inactive';
+    const badge = on
+      ? '<span class="sur-status-badge badge-on">🔴 啟用中</span>'
+      : '<span class="sur-status-badge badge-off">⬜ 未啟用</span>';
+    const period = `${sur.startM}/${sur.startD} – ${sur.endM}/${sur.endD}`;
+    const zoneRows = Object.entries(sur.zones).map(([zone, rate]) =>
+      `<div class="sur-row"><span>${zone}</span><span class="sv">${rate > 0 ? '+'+rate+' NTD/kg' : '–'}</span></div>`
+    ).join('');
+    return `
+      <div class="sur-card ${cls}">
+        <div class="sur-card-head" style="border-left: 4px solid ${sur.color}">
+          <span>${sur.label}</span>
+          ${badge}
+        </div>
+        <div class="sur-card-body">
+          <div class="sur-row"><span>適用期間</span><span class="sv ok">${period}</span></div>
+          <div class="sur-divider"></div>
+          ${zoneRows}
+          <div style="font-size:10px;color:#a0aec0;margin-top:6px;">${sur.note}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // 渲染每件附加費勾選列
+  const checkGrid = document.getElementById('surCheckGrid');
+  checkGrid.innerHTML = PIECE_SURCHARGES.map(ps => {
+    const on = isCarrierActive(ps, today);
+    const carrierColor = { DHL:'#d32011', FedEx:'#4d148c', UPS:'#351c15' }[ps.carrier] || '#666';
+    const inactiveClass = on ? '' : ' inactive-item';
+    const carrierTag = `<span style="background:${carrierColor};color:white;border-radius:3px;padding:1px 5px;font-size:10px;">${ps.carrier}</span>`;
+    return `
+      <label class="sur-check-item${inactiveClass}" id="lbl_${ps.id}" title="${ps.desc}">
+        <input type="checkbox" id="chk_${ps.id}" ${on ? '' : 'disabled'}
+          onchange="calcSurcharge()" data-id="${ps.id}" data-per="${ps.perPiece}">
+        ${carrierTag} ${ps.label}
+        <strong style="margin-left:4px">+${ps.perPiece.toLocaleString()}/件</strong>
+      </label>`;
+  }).join('');
+
+  // 設定 checkbox 變化時更新樣式
+  document.querySelectorAll('.sur-check-item input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const lbl = document.getElementById('lbl_' + cb.dataset.id);
+      lbl.classList.toggle('checked', cb.checked);
+    });
+  });
+}
+
+// ── 試算附加費 ──
+function calcSurcharge() {
+  const today = new Date();
+  const wt  = parseFloat(parsedData.weight) || 0;
+  const pcs = parseInt((parsedData.pieces || '').match(/\d+/)?.[0]) || 1;
+
+  if (!wt) {
+    document.getElementById('surResult').style.display = 'none';
+    return;
+  }
+
+  let html = '<div class="sur-result-title">💰 附加費試算結果</div>';
+  let hasAny = false;
+
+  PKG_SURCHARGES.forEach(sur => {
+    if (!isCarrierActive(sur, today)) return;
+    // 取最高區域費率作為試算示例（實際依目的地區域）
+    const maxRate = Math.max(...Object.values(sur.zones));
+    const minRate = Math.min(...Object.values(sur.zones).filter(v => v > 0));
+    const low  = (wt * minRate).toFixed(0);
+    const high = (wt * maxRate).toFixed(0);
+    html += `<div class="sur-result-row">
+      <span>${sur.carrier} 旺季（每kg ${minRate}–${maxRate} NTD × ${wt}kg）</span>
+      <span class="sur-result-total">NTD ${parseInt(low).toLocaleString()} – ${parseInt(high).toLocaleString()}</span>
+    </div>`;
+    hasAny = true;
+  });
+
+  // 每件勾選項目
+  const checkedItems = [];
+  document.querySelectorAll('.sur-check-item input:checked').forEach(cb => {
+    const ps = PIECE_SURCHARGES.find(p => p.id === cb.dataset.id);
+    if (!ps) return;
+    const total = ps.perPiece * pcs;
+    html += `<div class="sur-result-row">
+      <span>${ps.carrier} ${ps.label}（${ps.perPiece.toLocaleString()} × ${pcs}件）</span>
+      <span class="sur-result-total">NTD ${total.toLocaleString()}</span>
+    </div>`;
+    checkedItems.push(total);
+    hasAny = true;
+  });
+
+  if (!hasAny) {
+    document.getElementById('surResult').style.display = 'none';
+    return;
+  }
+
+  html += '<div class="sur-warn">⚠️ 上方為旺季附加費估算範圍，不含燃油附加費。實際費率依目的地區域及服務等級而定，請以業者官方費率為準。</div>';
+  const el = document.getElementById('surResult');
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+// 解析完成後也更新附加費試算（在 renderOutput 末尾 hook）
+const _origRenderOutput = renderOutput;
+renderOutput = function() {
+  _origRenderOutput();
+  calcSurcharge();
+};
 </script>
 
 </body>
