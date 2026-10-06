@@ -362,6 +362,31 @@
     .sur-result-row { display: flex; justify-content: space-between; padding: 2px 0; }
     .sur-result-total { font-size: 14px; font-weight: bold; color: #c05621; }
     .sur-warn { color: #d69e2e; font-size: 11px; margin-top: 6px; }
+
+    /* ── 分頁導覽 ── */
+    .tab-bar {
+      background: #1a365d;
+      display: flex;
+      gap: 0;
+      padding: 0 20px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      font-family: inherit;
+      letter-spacing: 0.3px;
+    }
+    .tab-btn:hover { color: rgba(255,255,255,0.9); }
+    .tab-btn.active { color: #fff; border-bottom-color: #63b3ed; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
   </style>
 </head>
 <body>
@@ -374,7 +399,14 @@
   <span class="version-badge">免費本地版 v1.1</span>
 </header>
 
-<!-- ===== 旺季附加費模組 ===== -->
+<!-- ===== 分頁導覽列 ===== -->
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('parse')" id="tabParse">✉️ 訊息解析</button>
+  <button class="tab-btn" onclick="switchTab('surcharge')" id="tabSurcharge">🔥 旺季附加費監控</button>
+</nav>
+
+<!-- ===== Tab 2: 旺季附加費監控 ===== -->
+<div class="tab-panel" id="panelSurcharge">
 <div class="surcharge-panel" id="surPanel">
   <div class="sur-header">
     <span>🔥 旺季附加費試算（DHL / UPS / FedEx）</span>
@@ -397,7 +429,10 @@
     <div class="sur-result" id="surResult" style="display:none;"></div>
   </div>
 </div>
+</div><!-- /panelSurcharge -->
 
+<!-- ===== Tab 1: 訊息解析 ===== -->
+<div class="tab-panel active" id="panelParse">
 <div class="container">
 
   <!-- ===== 左側：輸入 ===== -->
@@ -462,7 +497,8 @@
     </div>
   </div>
 
-</div>
+</div><!-- /container -->
+</div><!-- /panelParse -->
 
 <div class="toast" id="toast">✓ 已複製到剪貼簿！</div>
 
@@ -505,6 +541,16 @@ Commodity: 玩具 / Toys
 SIZE: 55×45×40 cm
 FedEx 報價？`
 };
+
+// =====================================================
+//  分頁切換
+// =====================================================
+function switchTab(tab) {
+  ['parse','surcharge'].forEach(t => {
+    document.getElementById('panel' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+    document.getElementById('tab'   + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+  });
+}
 
 // =====================================================
 //  解析核心
